@@ -3,7 +3,6 @@ import * as path from 'path';
 import { AstParser } from '../parsers/ast.parser';
 import { ModuleMetadata, ProviderMetadata } from '../types/modules.types';
 
-
 export class DependencyAnalyzer {
   private modules: Map<string, ModuleMetadata> = new Map();
 

@@ -12,6 +12,7 @@ export interface ImportMetadata {
   path?: string;
   isAsync?: boolean;
   dependencies?: string[];
+  isForwardReference?: boolean;
   module?: Partial<ModuleMetadata>;
 }
 

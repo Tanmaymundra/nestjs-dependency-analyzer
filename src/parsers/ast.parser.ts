@@ -173,18 +173,35 @@ export class AstParser {
       return undefined;
     }
 
-    // Clean up the path
     const path = importDecl.moduleSpecifier.text;
     if (path.startsWith('@nestjs/')) {
-      // For NestJS modules, use the module name
       return path.split('/').pop();
     }
     return path;
   }
 
   private parseAsyncImport(callExpression: ts.CallExpression): ImportMetadata {
+    // Handle forwardRef case
+    if (ts.isIdentifier(callExpression.expression) && callExpression.expression.text === 'forwardRef') {
+      // forwardRef should have one argument that is an arrow function
+      const arrowFunc = callExpression.arguments[0];
+      if (arrowFunc && ts.isArrowFunction(arrowFunc)) {
+        const returnExpr = arrowFunc.body;
+        if (ts.isIdentifier(returnExpr)) {
+          return {
+            name: returnExpr.text,
+            path: this.resolveImportPath(returnExpr),
+            isAsync: true,
+            isForwardReference: true,
+            dependencies: [],
+          };
+        }
+      }
+      return this.createUnknownImport();
+    }
+
+    // Handle other async imports (like TypeOrmModule.forRoot())
     if (!ts.isIdentifier(callExpression.expression)) {
-      // Handle cases like TypeOrmModule.forRoot()
       if (ts.isPropertyAccessExpression(callExpression.expression)) {
         const moduleName = callExpression.expression.expression.getText();
         return {
@@ -197,7 +214,6 @@ export class AstParser {
       return this.createUnknownImport();
     }
 
-
     return {
       name: callExpression.expression.text,
       path: this.resolveImportPath(callExpression.expression as ts.Identifier),
@@ -205,7 +221,6 @@ export class AstParser {
       dependencies: [],
     };
   }
-
   private extractExports(node: ts.ObjectLiteralExpression): string[] {
     const exportsProp = this.findPropertyAssignment(node, 'exports');
     if (!exportsProp || !ts.isArrayLiteralExpression(exportsProp.initializer)) {

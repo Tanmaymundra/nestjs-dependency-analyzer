@@ -31,7 +31,7 @@ export class AnalyzeCommand extends Command {
             await fs.mkdir(outputDir, { recursive: true });
 
             // Write the DOT file with proper line endings
-            const content = output.replace(/\r\n/g, '\n'); // Normalize line endings
+            const content = output.replace(/\r\n/g, '\n');
             await fs.writeFile(options.output, content, 'utf8');
             console.log(`DOT file saved to: ${options.output}`);
 

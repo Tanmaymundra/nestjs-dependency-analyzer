@@ -12,6 +12,7 @@ export class DotVisualizer {
     lines.push('  node [shape=box, style=filled, fillcolor=lightgray];');
     lines.push('');
 
+    // Generate nodes
     this.modules.forEach((module, moduleName) => {
       const label = this.escapeLabel(
         `${moduleName}\\n` +
@@ -24,9 +25,12 @@ export class DotVisualizer {
     });
     lines.push('');
 
+    // Generate module dependencies
     this.modules.forEach((module, moduleName) => {
       module.imports.forEach((imp) => {
-        lines.push(`  "${this.escapeName(moduleName)}" -> "${this.escapeName(imp.name)}" [label="imports"];`);
+        const edgeStyle = imp.isForwardReference ? '[label="imports (forward ref)", style=dashed, color=red]' : '[label="imports"]';
+
+        lines.push(`  "${this.escapeName(moduleName)}" -> "${this.escapeName(imp.name)}" ${edgeStyle};`);
       });
     });
 
