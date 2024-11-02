@@ -152,11 +152,11 @@ nestjs-dependency-analyzer/
 └── package.json
 ```
 
-### Running Tests
+<!-- ### Running Tests
 
 ```bash
 npm test
-```
+``` -->
 
 ### Building
 
