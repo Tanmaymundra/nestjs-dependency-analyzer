@@ -119,6 +119,13 @@ Provides detailed information about each module including:
 - Controllers count
 - Export information
 
+
+### Visual Using Graphviz
+
+Example:
+
+![Graph Demo](./assets/test-graph.png)
+
 ## Module Analysis
 
 The analyzer examines:
