@@ -18,7 +18,8 @@ export class DotVisualizer {
         `${moduleName}\\n` +
           `Controllers: ${module.controllers.length}\\n` +
           `Providers: ${module.providers.length}\\n` +
-          `Imports: ${module.imports.length}`,
+          `Imports: ${module.imports.length}\\n` +
+          `Entities: ${module.entityCount}`,
       );
 
       lines.push(`  "${this.escapeName(moduleName)}" [label="${label}"];`);

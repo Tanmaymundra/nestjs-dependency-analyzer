@@ -81,6 +81,7 @@ export class AstParser {
       exports: this.extractExports(argument),
       providers: this.extractProviders(argument),
       controllers: this.extractControllers(argument),
+      entityCount: this.extractEntityCount(argument),
     };
   }
 
@@ -133,6 +134,64 @@ export class AstParser {
 
       return this.createUnknownImport();
     });
+  }
+
+  private extractEntityCount(node: ts.ObjectLiteralExpression): number {
+    const imports = this.findPropertyAssignment(node, 'imports');
+    if (!imports || !ts.isArrayLiteralExpression(imports.initializer)) {
+      return 0;
+    }
+
+    let entityCount = 0;
+
+    for (const element of imports.initializer.elements) {
+      if (ts.isCallExpression(element)) {
+        // Check for TypeOrmModule.forFeature([...entities])
+        if (ts.isPropertyAccessExpression(element.expression)) {
+          const fullExpression = element.expression.getText();
+          if (fullExpression === 'TypeOrmModule.forFeature') {
+            const [entityArray] = element.arguments;
+            if (ts.isArrayLiteralExpression(entityArray)) {
+              entityCount += entityArray.elements.length;
+            }
+          }
+        }
+
+        // Check for TypeOrmModule.forRoot({ entities: [...] })
+        if (ts.isPropertyAccessExpression(element.expression) && element.expression.expression.getText() === 'TypeOrmModule') {
+          const [config] = element.arguments;
+          if (ts.isObjectLiteralExpression(config)) {
+            const entitiesProperty = this.findPropertyAssignment(config, 'entities');
+            if (entitiesProperty && ts.isArrayLiteralExpression(entitiesProperty.initializer)) {
+              entityCount += entitiesProperty.initializer.elements.length;
+            }
+          }
+        }
+
+        // Check for MongooseModule.forFeature([...models])
+        if (ts.isPropertyAccessExpression(element.expression)) {
+          const fullExpression = element.expression.getText();
+          if (fullExpression === 'MongooseModule.forFeature') {
+            const [modelArray] = element.arguments;
+            if (ts.isArrayLiteralExpression(modelArray)) {
+              entityCount += modelArray.elements.length;
+            }
+          }
+        }
+
+        // Check for SequelizeModule.forFeature([...models])
+        if (ts.isPropertyAccessExpression(element.expression)) {
+          const fullExpression = element.expression.getText();
+          if (fullExpression === 'SequelizeModule.forFeature') {
+            const [modelArray] = element.arguments;
+            if (ts.isArrayLiteralExpression(modelArray)) {
+              entityCount += modelArray.elements.length;
+            }
+          }
+        }
+      }
+    }
+    return entityCount;
   }
 
   private createImportMetadata(identifier: ts.Identifier): ImportMetadata {
@@ -383,6 +442,7 @@ export class AstParser {
       exports: [],
       providers: [],
       controllers: [],
+      entityCount: 0,
     };
   }
 }

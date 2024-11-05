@@ -5,6 +5,7 @@ export interface ModuleMetadata {
   exports: string[];
   providers: ProviderMetadata[];
   controllers: string[];
+  entityCount: number;
 }
 
 export interface ImportMetadata {
